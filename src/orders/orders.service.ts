@@ -11,6 +11,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices'
 import { ChangeOrderStatusDto, OrderPaginationDTO } from './dto'
 import { NATS_SERVICE } from 'src/config/services'
 import { firstValueFrom } from 'rxjs'
+import { OrderWithProducts } from './dto/interfaces/order-with-products.interface'
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -155,5 +156,23 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       where: { id },
       data: { status }
     })
+  }
+
+  async createPaymentSession(order: OrderWithProducts) {
+    const paymentSession = await firstValueFrom(
+      this.client.send('create.payment.session', {
+        orderId: order.id,
+        currency: 'usd',
+        items: order.OrderItem.map((orderItem) => ({
+          name: orderItem.product,
+          price: orderItem.price,
+          quantity: orderItem.quantity
+        }))
+      })
+    ).catch((error) => {
+      throw new RpcException(error)
+    })
+
+    return paymentSession
   }
 }
