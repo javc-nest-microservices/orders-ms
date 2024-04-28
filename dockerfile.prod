@@ -10,14 +10,19 @@ RUN yarn
 
 #* ============ Builder ============ #
 FROM node:21-alpine3.19 as build
+
+ARG ORDERS_DATABASE_URL
+ENV DATABASE_URL=$ORDERS_DATABASE_URL
+
 WORKDIR /usr/src/app
 
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
 
+RUN yarn prisma migrate deploy
+RUN yarn prisma generate
 RUN yarn build
 RUN yarn install --frozen-lockfile -f --only=production && yarn cache clean --force
-RUN yarn prisma generate
 
 #* ============ Create final image ============ #
 FROM node:21-alpine3.19 as prod
