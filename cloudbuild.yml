@@ -4,11 +4,15 @@ steps:
     args:
       - -c
       - |
-        docker build -t 'northamerica-northeast1-docker.pkg.dev/e-commerce-microservicios/images-repository/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
+        docker build -t northamerica-northeast1-docker.pkg.dev/e-commerce-microservicios/images-repository/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
     secretEnv: ['DATABASE_URL']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', ''northamerica-northeast1-docker.pkg.dev/e-commerce-microservicios/images-repository/orders-ms']
+    args:
+      [
+        'push',
+        'northamerica-northeast1-docker.pkg.dev/e-commerce-microservicios/images-repository/orders-ms'
+      ]
 
 availableSecrets:
   secretManager:
